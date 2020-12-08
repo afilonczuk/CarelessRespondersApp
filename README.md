@@ -3,15 +3,23 @@
 The purpose of this application is to allow researchers to upload their data, view potential careless respondents in the data identified by statistical methods, and independently decide which types of careless respondents should be removed. The application can be viewed at the link https://careless-statistics.shinyapps.io/carelessstatistics/.
 
 UPLOADING DATA:
+
 Under “Data Set of Responses,” a CSV file of likert-type data can be uploaded. Once a file with the raw data is uploaded, a head of the first ten response vectors will appear in this tab.
+
 Check “Header” if the data has a header (column names).
+
 Select the type of separation in your data file (i.e. Are values comma - separated?)
+
 Select the quotes used to quote strings.
+
 Check “User IDs” if the data includes an identification for each respondent at the beginning of each response vector.
-Check “Item-Level Descriptive Statistics” to obtain summaries for each item.
-If selected, a table with the mean and standard deviation for each item can be downloaded in the “Downloading Data” tab.
+
+Check “Item-Level Descriptive Statistics” to obtain summaries for each item. If selected, a table with the mean and standard deviation for each item can be downloaded in the “Downloading Data” tab.
+
 If selected, view bar plots displaying the distribution of responses for select items under the “Descriptive Statistics” tab.
+
 Indicate the number of levels in the likert scale. For example, if respondents could choose between five options, input 5. If there were three options (such as “Agree”, “Neutral”, and “Disagree”), input 3.
+
 Indicate the lowest value in the likert scale. If the data includes five levels and ranges from zero to four, input 0, or if your data ranges from one to five, input 1.
 If the data includes a validity item, input the number of the column corresponding to the item. If no validity item was administered, leave blank or enter “NA.” See “Method Explanations” tab for examples of a validity item.
 Input the correct answer to the validity item.
