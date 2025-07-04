@@ -121,68 +121,364 @@ tabItem(
     ))
 ),
 
-  tabItem(
-    tabName = "explanations", 
-    h2("Explanations of Methods"),
-############Here is where Max will explain info##############
-    # Main panel for displaying outputs ----
-fluidRow(
-  mainPanel( 
-    column(width = 10,
-           div(
-               style="overflow-x: scroll"),
-           style = "border: 4px double black;",
-           h2("Careless Responding"),
-           h5("Survey participants are inattentive or do not properly read the item questions")
-           ),
-    
-    column(width = 12,
-           p("
-             
-             
-             
-             ")
-           ),
-    column(width = 12,
-           div(
-             style="overflow-x: scroll"),
-           style = "border: 2px double black;",
-      h4("Validity Item: "),
-      p("An item used to make sure a respondent is paying attention. 
-      Althouhg a validity item can take many forms, this application will detect careless responders from an item that asks the respondent to select a specific response 
-      (ex. 'Please select option '1' to show that you are paying attention'). 
-      A careless responder will have a response that is different from the expected answer ('1' in this case). 
-        
-        "),
-      h4("Intra-individual response variability: "),
-      p(" Determines the variability in one's responses and compares it to the distribution of all respondents' variability. Indicates potential careless respondents who respond randomly (high IRV) or select the same response repeatedly (low IRV). 
-        
-        "),
-      h4("Longstring: "),
-      p("The highest number of items in which a respondent has selected the same response consecutively. 
-      (ex. selecting '1, 1, 1, 1...' etc.). This type of carelessness may also be known as straightlining. 
-      This application will consider the distribution of all respondents' longstrings and flag responders if their 
-      highest longstring is an outlier in the distribution (greater than 1.5 times the average longstring).
-      
-        "),
-      h4("Average Longstring: "),
-      p("A respondent's average number of longstrings (the average length of consecutive responses). 
-      This method may be useful if a respondent is straightlining and switches their response multiple times during the test administration 
-      (ex. a respondent may choose answer '1' consecutively but begin answering '2' consecutively on the next page of the test).
-        
-        "),
-      h4("Mahalanobis Distance:"),
-      p("Highlights response vectors that differ greatly from the average distribution of responses on the chi-square distribution.
-        
-        "),
-      h4("Person Fit:"),
-      p("Highlights response vectors that differ greatly from the average distribution of responses on the normal curve. 
-      Given a z-score that that is above or below the critical value found using alpha/2 % level, a person will be flagged.
-        
-        ")
-      ))
-)
-         ),
+    tabItem(
+        tabName = "explanations", 
+        h2("Explanations of Methods"),
+     # Main panel for displaying the explanation page ----    
+        fluidRow(
+          mainPanel( 
+            # Overview & Statistical Thresholds Section
+            column(width = 12,
+                   div(style="overflow-x: scroll"),
+                   style = "border: 2px double black;",
+                   h2("Careless Responding"),
+                   p("Survey participants are inattentive or do not properly read the item questions"),
+                   hr(),
+                   
+                   h3("Overview & Statistical Thresholds"),
+                   p(strong("All careless responding detection methods follow this statistical framework:")),
+                   p("• Calculate a specific metric for each respondent based on their response pattern"),
+                   p("• Aggregate these individual metrics to form a group distribution"),
+                   p("• Apply statistical thresholds to identify outliers or unusual patterns"),
+                   p("• Flag respondents exceeding thresholds for further review or exclusion"),
+                   hr(),
+                   
+                   h3("Understanding Statistical Thresholds"),
+                   h4("Percentile-Based Approaches:"),
+                   withMathJax("$$P_{5} \\quad \\text{and} \\quad P_{95}$$"),
+                   p("• \\(P_{5}\\): 5th percentile - flags bottom 5% of distribution"),
+                   p("• \\(P_{95}\\): 95th percentile - flags top 5% of distribution"),
+                   p("• Example: If \\(P_{95}(IRV) = 1.5\\), then respondents with \\(IRV > 1.5\\) are flagged"),
+                   hr(),
+                   
+                   h4("Standard Deviation-Based Approaches:"),
+                   withMathJax("$$\\bar{x} \\pm k \\cdot SD$$"),
+                   p("• \\(k = 1.5\\): Moderate threshold (flags ~13% outside range)"),
+                   p("• \\(k = 2.0\\): Conservative threshold (flags ~5% outside range)"),
+                   p("• \\(k = 3.0\\): Very conservative threshold (flags ~0.3% outside range)"),
+                   hr(),
+                   
+                   h4("Significance Levels:"),
+                   withMathJax("$$\\alpha \\in \\{0.05, 0.01, 0.001\\}$$"),
+                   p("• \\(\\alpha = 0.05\\): Standard level, accepts 5% Type I error rate"),
+                   p("• \\(\\alpha = 0.01\\): Conservative level, accepts 1% Type I error rate"),
+                   p("• \\(\\alpha = 0.001\\): Very conservative, accepts 0.1% Type I error rate"),
+                   p(strong("Note:"), " Lower \\(\\alpha\\) reduces false positives but may miss genuine careless responders. Adjust based on your research context.")
+            ),
+            
+            column(width = 12,
+                   p("")),
+            
+            # Validity Items
+            column(width = 12,
+                   div(style="overflow-x: scroll"),
+                   style = "border: 2px double black;",
+                   h3("Validity Items"),
+                   p("Validity items are strategically placed questions designed to verify respondent attention and comprehension. They serve as direct checks on whether participants are reading and processing survey content appropriately."),
+                   hr(),
+                   
+                   h4("Types and Implementation"),
+                   
+                   p(strong("1. Direct Instruction Items")),
+                   p("Explicitly instruct respondents to select a specific response."),
+                   p(em("Example:"), " 'To demonstrate you are paying attention, please select Strongly Disagree for this item.'"),
+                   p("• Expected: Strongly Disagree"),
+                   p("• Flag if: Any other response"),
+                   hr(),
+                   
+                   p(strong("2. Arithmetic Check Items")),
+                   p("Simple mathematical problems requiring minimal cognitive effort."),
+                   p(em("Example:"), " 'What is \\(2 + 3\\)?'"),
+                   p("• Options: 1, 3, 5, 7, 9"),
+                   p("• Expected: 5"),
+                   p("• Flag if: \\(response \\neq 5\\)"),
+                   hr(),
+                   
+                   p(strong("3. Bogus Items")),
+                   p("Statements that are objectively false or impossible."),
+                   p(em("Examples:")),
+                   p("• 'I have visited every planet in the solar system'"),
+                   p("• 'I am answering this survey from the year 1850'"),
+                   p("• 'I have never used water in my entire life'"),
+                   p("Flag if: Agreement (\\(response \\geq 4\\) on 1-5 scale)"),
+                   hr(),
+                   
+                   h4("Implementation Guidelines"),
+                   p("• Include 3-5 validity items per 100 survey questions"),
+                   p("• Distribute throughout survey (beginning, middle, end)"),
+                   p("• Vary types to catch different inattention patterns"),
+                   p("• Consider multiple failures: \\(failures \\geq 2\\) → exclude data")
+            ),
+            
+            column(width = 12,
+                   p("")),
+            
+            # Intra-individual Response Variability (IRV)
+            column(width = 12,
+                   div(style="overflow-x: scroll"),
+                   style = "border: 2px double black;",
+                   h3("Intra-individual Response Variability (IRV)"),
+                   p("IRV measures the standard deviation of an individual's responses across items. It quantifies response consistency - low values suggest uniform responding (potential straight-lining), while high values indicate erratic patterns (potential random responding). Originally introduced by Dunn et al. (2018), it is also known as the Inter-Item Standard Deviation (ISD) in Marjanovic et al. (2015)."),
+                   hr(),
+                   
+                   h4("Mathematical Foundation"),
+                   withMathJax("$$IRV = \\sqrt{\\frac{\\sum_{j=1}^{J}(x_j-\\bar{x})^2}{J-1}}$$"),
+                   
+                   p(strong("Where:")),
+                   p("• \\(x_j\\) = response to item \\(j\\)"),
+                   p("• \\(\\bar{x} = \\frac{1}{J}\\sum_{j=1}^{J}x_j\\) = mean response across all items"),
+                   p("• \\(J\\) = total number of items"),
+                   p("• \\(J-1\\) = degrees of freedom"),
+                   p("This is the standard deviation of responses across consecutive item responses for an individual."),
+                   hr(),
+                   
+                   h4("Detailed Example"),
+                   p(strong("Participant responses to 20 items (1-5 scale):")),
+                   p(code("[5, 1, 5, 1, 5, 5, 5, 5, 1, 5, 3, 2, 4, 1, 5, 2, 5, 1, 5, 3]")),
+                   
+                   p(strong("Calculation:")),
+                   p("• \\(\\bar{x} = \\frac{5+1+5+...+3}{20} = \\frac{70}{20} = 3.5\\)"),
+                   p("• Deviations: \\((5-3.5), (1-3.5), ... = 1.5, -2.5, 1.5, ...\\)"),
+                   p("• Squared deviations: \\(2.25, 6.25, 2.25, ...\\)"),
+                   p("• \\(\\sum(x_j-\\bar{x})^2 = 58.0\\)"),
+                   p("• \\(\\frac{58.0}{19} = 3.053\\)"),
+                   p("• \\(IRV = \\sqrt{3.053} = 1.749\\)"),
+                   hr(),
+                   
+                   h4("Interpretation"),
+                   p(strong("Research-based thresholds"), " (Dunn et al., 2018; Marjanovic et al., 2015):"),
+                   p("• \\(IRV < 0.5\\): Extremely low variability → likely straight-lining"),
+                   p("• \\(0.5 \\leq IRV < 0.9\\): Low variability → possible patterned responding"),
+                   p("• \\(0.9 \\leq IRV \\leq 1.5\\): Normal range → engaged responding"),
+                   p("• \\(1.5 < IRV \\leq 2.0\\): High variability → potential carelessness"),
+                   p("• \\(IRV > 2.0\\): Very high variability → likely random responding"),
+                   
+                   p(strong("Note:"), " While Dunn et al. (2018) proposed flagging low IRV scores as outliers (reflecting straight-lining), Marjanovic et al. (2015) proposed flagging high IRV scores (reflecting random responding)."),
+                   p(strong("In our example:"), " \\(IRV = 1.749\\) exceeds the threshold of 1.5, suggesting potential random responding.")
+            ),
+            
+            column(width = 12,
+                   p("")),
+            
+            # Maximum Longstring
+            column(width = 12,
+                   div(style="overflow-x: scroll"),
+                   style = "border: 2px double black;",
+                   h3("Maximum Longstring"),
+                   p("Maximum Longstring identifies the longest sequence of consecutive identical responses. It captures respondents who may have stopped paying attention and repeatedly selected the same option. Introduced by Johnson (2005), this index is particularly effective for detecting straight-lining behavior."),
+                   hr(),
+                   
+                   h4("Mathematical Definition"),
+                   withMathJax("$$MaxLongstring = \\max\\{L_1, L_2, \\ldots, L_k\\}$$"),
+                   
+                   p(strong("Where:")),
+                   p("• \\(L_i\\) = length of \\(i\\)-th consecutive sequence"),
+                   p("• \\(k\\) = total number of consecutive sequences"),
+                   p("• \\(\\max\\{\\cdot\\}\\) = maximum function"),
+                   hr(),
+                   
+                   h4("Detailed Example"),
+                   p(strong("Response vector (20 items):")),
+                   p(code("[3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 3, 2, 4, 2, 3]")),
+                   
+                   p(strong("Sequence Identification:")),
+                   p("• Positions 1-14: Fourteen 3's → \\(L_1 = 14\\)"),
+                   p("• Position 15: One 2 → \\(L_2 = 1\\)"),
+                   p("• Position 16: One 3 → \\(L_3 = 1\\)"),
+                   p("• Position 17: One 2 → \\(L_4 = 1\\)"),
+                   p("• Position 18: One 4 → \\(L_5 = 1\\)"),
+                   p("• Position 19: One 2 → \\(L_6 = 1\\)"),
+                   p("• Position 20: One 3 → \\(L_7 = 1\\)"),
+                   
+                   p(strong("Result:"), " \\(MaxLongstring = \\max\\{14, 1, 1, 1, 1, 1, 1\\} = 14\\)"),
+                   hr(),
+                   
+                   h4("Interpretation"),
+                   p(strong("Thresholds (for 20-item scale):")),
+                   p("• \\(MaxLongstring \\leq 4\\): Normal variation"),
+                   p("• \\(5 \\leq MaxLongstring \\leq 8\\): Borderline concerning"),
+                   p("• \\(9 \\leq MaxLongstring \\leq 14\\): Likely inattentive"),
+                   p("• \\(MaxLongstring \\geq 15\\): Strong evidence of carelessness"),
+                   
+                   p(strong("Common threshold:"), " \\(\\bar{x} + 1.5 \\times SD\\) of the distribution"),
+                   p(strong("In our example:"), " \\(MaxLongstring = 14\\) strongly suggests inattentive responding.")
+            ),
+            
+            column(width = 12,
+                   p("")),
+            
+            # Average Longstring
+            column(width = 12,
+                   div(style="overflow-x: scroll"),
+                   style = "border: 2px double black;",
+                   h3("Average Longstring"),
+                   p("Average Longstring complements Maximum Longstring by considering all consecutive sequences, not just the longest. It identifies respondents with consistently long sequences throughout the survey."),
+                   hr(),
+                   
+                   h4("Mathematical Definition"),
+                   withMathJax("$$AvgLongstring = \\frac{1}{m}\\sum_{i=1}^{m} L_i$$"),
+                   
+                   p(strong("Where:")),
+                   p("• \\(L_i\\) = length of \\(i\\)-th consecutive sequence"),
+                   p("• \\(m\\) = number of consecutive sequences"),
+                   p("• Note: \\(m \\leq J\\) (total items)"),
+                   hr(),
+                   
+                   h4("Detailed Example"),
+                   p(strong("Using previous data with sequences:"), " \\(\\{14, 1, 1, 1, 1, 1, 1\\}\\)"),
+                   
+                   p(strong("Calculation:")),
+                   p("• Sum of lengths: \\(\\sum L_i = 14 + 1 + 1 + 1 + 1 + 1 + 1 = 20\\)"),
+                   p("• Number of sequences: \\(m = 7\\)"),
+                   p("• \\(AvgLongstring = \\frac{20}{7} = 2.86\\)"),
+                   hr(),
+                   
+                   h4("Interpretation"),
+                   p(strong("Typical Thresholds:")),
+                   p("• \\(AvgLongstring < 2.0\\): Good response variation"),
+                   p("• \\(2.0 \\leq AvgLongstring < 3.0\\): Acceptable range"),
+                   p("• \\(3.0 \\leq AvgLongstring < 4.0\\): Potential concern"),
+                   p("• \\(AvgLongstring \\geq 4.0\\): Likely problematic"),
+                   
+                   p(strong("Comparison Example:")),
+                   p("• Respondent A: One sequence of 10, rest singles → \\(Max = 10\\), \\(Avg = 1.8\\)"),
+                   p("• Respondent B: Five sequences of 4 each → \\(Max = 4\\), \\(Avg = 4.0\\)"),
+                   p("Respondent B shows more consistent patterning despite lower maximum.")
+            ),
+            
+            column(width = 12,
+                   p("")),
+            
+            # Mahalanobis Distance
+            column(width = 12,
+                   div(style="overflow-x: scroll"),
+                   style = "border: 2px double black;",
+                   h3("Mahalanobis Distance"),
+                   p("Mahalanobis Distance measures how far a respondent's multivariate response pattern deviates from the typical pattern, accounting for correlations between items. Unlike Euclidean distance, it considers the covariance structure of the data."),
+                   hr(),
+                   
+                   h4("Mathematical Foundation"),
+                   withMathJax("$$D^2 = (\\mathbf{x} - \\boldsymbol{\\mu})^T \\boldsymbol{\\Sigma}^{-1} (\\mathbf{x} - \\boldsymbol{\\mu})$$"),
+                   
+                   p(strong("Where:")),
+                   p("• \\(\\mathbf{x}\\) = respondent's response vector"),
+                   p("• \\(\\boldsymbol{\\mu}\\) = group mean vector"),
+                   p("• \\(\\boldsymbol{\\Sigma}\\) = covariance matrix"),
+                   p("• \\(\\boldsymbol{\\Sigma}^{-1}\\) = inverse covariance matrix"),
+                   p("• \\(D^2\\) follows \\(\\chi^2\\) distribution with \\(df = p\\) (number of items)"),
+                   hr(),
+                   
+                   h4("Detailed Example"),
+                   p(strong("3-item job satisfaction survey (1-5 scale):")),
+                   p("• Item 1: 'I enjoy my work'"),
+                   p("• Item 2: 'My workload is manageable'"),
+                   p("• Item 3: 'I plan to stay with this company'"),
+                   
+                   p(strong("Group Statistics:")),
+                   withMathJax("$$\\boldsymbol{\\mu} = \\begin{bmatrix} 4.5 \\\\ 3.5 \\\\ 2.0 \\end{bmatrix}, \\quad \\boldsymbol{\\Sigma} = \\begin{bmatrix} 1.0 & 0.2 & 0.1 \\\\ 0.2 & 1.0 & 0.3 \\\\ 0.1 & 0.3 & 1.0 \\end{bmatrix}$$"),
+                   
+                   p(strong("Individual Response:")),
+                   withMathJax("$$\\mathbf{x} = \\begin{bmatrix} 5 \\\\ 3 \\\\ 1 \\end{bmatrix}$$"),
+                   
+                   p(strong("Calculation:")),
+                   p("• Deviation: \\(\\mathbf{x} - \\boldsymbol{\\mu} = \\begin{bmatrix} 0.5 \\\\ -0.5 \\\\ -1.0 \\end{bmatrix}\\)"),
+                   p("• \\(D^2 = 1.45\\) (after matrix multiplication)"),
+                   hr(),
+                   
+                   h4("Interpretation"),
+                   p(strong("Critical Values"), " (\\(\\chi^2\\) distribution):"),
+                   p(strong("For \\(df = 3\\)"), " (3 items in our example):"),
+                   p("• \\(\\chi^2_{0.05}(3) = 7.815\\)"),
+                   p("• \\(\\chi^2_{0.01}(3) = 11.345\\)"),
+                   p("• \\(\\chi^2_{0.001}(3) = 16.266\\)"),
+                   
+                   p(strong("The degrees of freedom equals the number of items. Other common critical values:")),
+                   p("• \\(df = 5\\): \\(\\chi^2_{0.05} = 11.070\\), \\(\\chi^2_{0.01} = 15.086\\)"),
+                   p("• \\(df = 10\\): \\(\\chi^2_{0.05} = 18.307\\), \\(\\chi^2_{0.01} = 23.209\\)"),
+                   p("• \\(df = 20\\): \\(\\chi^2_{0.05} = 31.410\\), \\(\\chi^2_{0.01} = 37.566\\)"),
+                   
+                   p(strong("In our example:"), " \\(D^2 = 1.45 < 7.815\\), so the response pattern is not statistically unusual at \\(\\alpha = 0.05\\).")
+            ),
+            
+            column(width = 12,
+                   p("")),
+            
+            # Person Fit
+            column(width = 12,
+                   div(style="overflow-x: scroll"),
+                   style = "border: 2px double black;",
+                   h3("\\(L_z\\) Statistic: Person-Fit Index"),
+                   p("The \\(L_z\\) statistic (Drasgow, Levine, & Williams, 1985) is a standardized log-likelihood statistic that measures whether a respondent's pattern is consistent with their overall ability or trait level. It compares the observed response pattern against what would be expected given the respondent's estimated ability, detecting unusual patterns such as correctly answering difficult items while missing easy ones."),
+                   hr(),
+                   
+                   h4("Mathematical Foundation"),
+                   p(strong("For dichotomous (binary) items where \\(u_i \\in \\{0, 1\\}\\), the log-likelihood is:")),
+                   withMathJax("$$\\log L(\\theta) = \\sum_{i=1}^n \\left[ u_i \\log P_i(\\theta) + (1 - u_i) \\log(1 - P_i(\\theta)) \\right]$$"),
+                   
+                   p(strong("The standardized \\(L_z\\) statistic is:")),
+                   withMathJax("$$L_z = \\frac{\\log L(\\theta) - \\mathbb{E}[\\log L(\\theta)]}{\\sqrt{\\mathrm{Var}[\\log L(\\theta)]}}$$"),
+                   
+                   p(strong("Where:")),
+                   p("• \\(u_i\\) = observed response to item \\(i\\) (0 = incorrect/disagree, 1 = correct/agree)"),
+                   p("• \\(P_i(\\theta)\\) = probability of correct/positive response to item \\(i\\) at ability \\(\\theta\\)"),
+                   p("• \\(\\mathbb{E}[\\log L(\\theta)]\\) = expected log-likelihood under the model"),
+                   p("• \\(\\mathrm{Var}[\\log L(\\theta)]\\) = variance of log-likelihood"),
+                   p("• \\(L_z \\sim N(0,1)\\) asymptotically when true \\(\\theta\\) is known"),
+                   
+                   p(strong("Note:"), " When estimated \\(\\hat{\\theta}\\) is used instead of true \\(\\theta\\), the distribution deviates from standard normal. Snijders (2001) developed \\(L_z^*\\) to correct for this."),
+                   hr(),
+                   
+                   h4("Detailed Calculation Example"),
+                   p(strong("Consider a 5-item test with dichotomous responses:")),
+                   p("• Items: Ordered from easy to difficult"),
+                   p("• Response pattern: \\(\\mathbf{u} = (1, 0, 1, 1, 0)\\)"),
+                   p("• Estimated ability: \\(\\hat{\\theta} = 0.5\\)"),
+                   
+                   p(strong("Item probabilities at \\(\\hat{\\theta} = 0.5\\):")),
+                   p("• \\(P_1(0.5) = 0.9\\) (easy item)"),
+                   p("• \\(P_2(0.5) = 0.7\\)"),
+                   p("• \\(P_3(0.5) = 0.5\\)"),
+                   p("• \\(P_4(0.5) = 0.3\\)"),
+                   p("• \\(P_5(0.5) = 0.1\\) (difficult item)"),
+                   
+                   p(strong("Log-likelihood calculation:")),
+                   p("• Item 1: \\(u_1 = 1\\), contributes \\(\\log(0.9) = -0.105\\)"),
+                   p("• Item 2: \\(u_2 = 0\\), contributes \\(\\log(1-0.7) = \\log(0.3) = -1.204\\)"),
+                   p("• Item 3: \\(u_3 = 1\\), contributes \\(\\log(0.5) = -0.693\\)"),
+                   p("• Item 4: \\(u_4 = 1\\), contributes \\(\\log(0.3) = -1.204\\)"),
+                   p("• Item 5: \\(u_5 = 0\\), contributes \\(\\log(0.9) = -0.105\\)"),
+                   
+                   p("\\(\\log L(0.5) = -0.105 - 1.204 - 0.693 - 1.204 - 0.105 = -3.311\\)"),
+                   
+                   p("If \\(\\mathbb{E}[\\log L(0.5)] = -2.5\\) and \\(\\sqrt{\\mathrm{Var}[\\log L(0.5)]} = 0.8\\):"),
+                   p("\\(L_z = \\frac{-3.311 - (-2.5)}{0.8} = \\frac{-0.811}{0.8} = -1.014\\)"),
+                   
+                   p("This negative value suggests the response pattern is somewhat unexpected given the ability level."),
+                   hr(),
+                   
+                   h4("Interpretation"),
+                   p(strong("Statistical Thresholds:")),
+                   p("• \\(L_z > -1.0\\): Normal response pattern"),
+                   p("• \\(-2.0 < L_z \\leq -1.0\\): Mildly unusual pattern"),
+                   p("• \\(-3.0 < L_z \\leq -2.0\\): Moderately unusual pattern (flag for review)"),
+                   p("• \\(L_z \\leq -3.0\\): Highly unusual pattern (likely invalid)"),
+                   
+                   p(strong("Significance-based cutoffs:")),
+                   p("• \\(\\alpha = 0.05\\): Flag if \\(L_z < -1.645\\)"),
+                   p("• \\(\\alpha = 0.01\\): Flag if \\(L_z < -2.326\\)"),
+                   p("• \\(\\alpha = 0.001\\): Flag if \\(L_z < -3.090\\)"),
+                   
+                   p(strong("Common patterns detected:")),
+                   p("• ", strong("Lucky guessing:"), " Correct on hard items, incorrect on easy items"),
+                   p("• ", strong("Careless errors:"), " Incorrect on easy items despite high ability"),
+                   p("• ", strong("Cheating:"), " Unusually high performance on specific item clusters"),
+                   p("• ", strong("Random responding:"), " No relationship between item difficulty and responses"),
+                   
+                   p(strong("Note:"), " While \\(L_z\\) was developed for Item Response Theory models, similar likelihood-based approaches can be adapted for other psychometric models. The key requirement is the ability to compute \\(P_i(\\theta)\\) - the probability of each response given the respondent's trait level.")
+            )
+          )
+        )
+      ),
 
 tabItem(
   tabName = "descriptive-stats",
