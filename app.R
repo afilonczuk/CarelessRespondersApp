@@ -175,10 +175,9 @@ fluidRow(
       p("Highlights response vectors that differ greatly from the average distribution of responses on the chi-square distribution.
         
         "),
-      h4("Person Fit:"),
-      p("Highlights response vectors that differ greatly from the average distribution of responses on the normal curve. 
-      Given a z-score that that is above or below the critical value found using alpha/2 % level, a person will be flagged.
-        
+      h4("lz Statistic:"),
+      p("Calculates the lz person-fit statistic for polytomous data (Drasgow, Levine, and Williams, 1985) according to the Graded Response Model.
+        A respondent is flagged if their lz statistic is less than the threshold according to the desired signifcance level and the standard normal distribution.
         ")
       ))
 )
