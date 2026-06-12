@@ -569,7 +569,7 @@ server <- function(input, output){
    methodtable <- colSums(bflagged, na.rm = TRUE)
    
    #Function - Create table with the statistics produced by each method; highlighted in red if flagged as careless
-   redflag.table <- function(dat.table, bflagged.table, vi_names, alpha) {
+   redflag.table <- function(dat.table, vi_names, alpha) {
      dt <- DT::datatable(dat.table, rownames = FALSE, options = list(scrollX = TRUE))
      
      if(!is.null(vi_names)){
@@ -587,9 +587,9 @@ server <- function(input, output){
        formatStyle("Average Longstring",
                    background = styleInterval(boxplot.stats(dat.table[,"Average Longstring"])$stats[5], c("white","red"))) %>%
        formatStyle("Mahalanobis D",
-                   # use the binary bflagged column to drive color on the raw-value column
-                   background = styleEqual(c(0, 1), c("white", "red"), 
-                                           data = bflagged.table[, "Mahalanobis D"])) %>%
+                   background = styleInterval(
+                     quantile(dat.table[, "Mahalanobis D"], probs = 1 - alpha, na.rm = TRUE),
+                     c("white", "red") )) %>%
        formatStyle("Person Fit",
                    background = styleInterval(c(qnorm(alpha/2), qnorm(1-(alpha/2))), c("red","white","red")))
      
@@ -604,7 +604,7 @@ server <- function(input, output){
      colnames(int) <- colnames(bflagged) <- c("User ID", colnames(int[,2:ncol(int)]))
      colnames(respondentflagrate) <- c("User ID", "Flag Rate")
     }
-    rflagged <- redflag.table(int, bflagged, vi_names, input$alpha)
+    rflagged <- redflag.table(int, vi_names, input$alpha)
     
      return(list("int" = int, 
                 "bflagged" = bflagged, 
