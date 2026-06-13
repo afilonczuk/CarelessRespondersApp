@@ -20,11 +20,11 @@ ui <- dashboardPage(
    div(style="overflow-y: scroll;overflow-x: scroll"),
    sidebarMenu(
       menuItem("Uploading Data", tabName = "uploading-data", icon = icon("dashboard")),
-      menuItem("Group-Level Visuals", tabName = "datavisuals", icon = icon("th")),
       menuItem("Explanations", tabName = "explanations", icon = icon("th")),
+      menuItem("Individual Statistics & Flags", tabName = "downloading-data", icon = icon("list-alt")),
+      menuItem("Group-Level Visuals", tabName = "datavisuals", icon = icon("th")),
       menuItem("Descriptive Statistics", tabName = "descriptive-stats", icon = icon("th")),
       menuItem("Preregistration", tabName = "preregistration", icon = icon("list-alt")),
-      menuItem("Individual Statistics & Flags", tabName = "downloading-data", icon = icon("list-alt")),
       menuItem("Help", tabName = "help", icon = icon("list-alt"))
          )
   ),
@@ -66,7 +66,7 @@ dashboardBody(
     #checkbox to indicate if userids are included
     checkboxInput("userid", "User IDs (Must be first column)", FALSE),
     
-    #Select if you would like item-level descriptive statistics. Note: only works 
+    #Select if you would like item-level descriptive statistics
     checkboxInput("descstats", "Item-Level Descriptive Statistics (Note: If your survey was randomized and your uploaded data is not organized by item, these statistics are not recommended.) ", FALSE),
     
     #Input number of levels in the likert scale
@@ -81,7 +81,7 @@ dashboardBody(
     
     #Input the correct answer to the validity item as a number
     textInput("correctanswer",
-              "Correct Answer(s) to Validity Item(s) (Comma-separated, same order as above)",
+              "Correct Answer(s) to Validity Item(s) (Comma-separated, same order and number as above)",
               value = ""), 
     
     #Select your alpha for person-fit statistics on the normal distribution
@@ -247,47 +247,74 @@ tabItem(
   fluidRow(
     # Description of what app does
     mainPanel( 
-      p("The purpose of this application is to allow researchers to upload their 
-        data, view potential careless respondents in the data identified by statistical 
-        methods, and independently decide which types of careless respondents should be removed."),
+      p("In this application, you can upload your data, obtain careless statistics 
+         for each participant, see which respondents are flagged by which statistic,
+        and independently decide which types of careless respondents should be removed."),
+      h2("EXPLANATIONS OF METHODS:"),
+      p("This tab explains the methods used to detect potential careless respondents."),
       h2("UPLOADING DATA:"),
-      p("Under “Data Set of Responses,” a CSV file of likert-type data can be uploaded. 
-        Once a file with the raw data is uploaded, a head of the first ten response 
+      p("Under “Data Set of Responses,” a CSV file of Likert-type data can be uploaded. 
+        Once a file with the raw data is uploaded, the first ten response 
         vectors will appear in this tab."),
       p("Check “Header” if the data has a header (column names)."),
       p("Select the type of separation in your data file (i.e. Are values comma - separated?)"),
       p("Select the quotes used to quote strings."),
-      p("Check “User IDs” if the data includes an identification for each respondent 
-        at the beginning of each response vector."),
+      p("Check “User IDs” if the first column of the dataset includes IDs for each respondent.
+        Note that neither IDs nor any other demographic information can be included in other columns of the uploaded data."),
       p("Check “Item-Level Descriptive Statistics” to obtain summaries for each item.
-        If selected, a table with the mean and standard deviation for each item can be 
+        If selected, a table with the mean and standard deviation of the response for each item can be 
         downloaded in the “Individual Statistics & Flags” tab. In addition, bar plots displaying the 
         distribution of responses for select items can be found under the “Descriptive Statistics” tab."),
-      p("Indicate the number of levels in the likert scale. For example, if respondents 
+      p("Indicate the number of levels in the Likert scale. For example, if respondents 
         could choose between five options, input 5. If there were three options (such as
         “Agree”, “Neutral”, and “Disagree”), input 3."),
-      p("Indicate the lowest value in the likert scale. If the data includes five levels
+      p("Indicate the lowest value in the Likert scale. For example, if the data includes five levels
         and ranges from zero to four, input 0, or if your data ranges from one to five, input 1."),
-      p("If the data includes a validity item, input the number of the column 
-        corresponding to the item. If no validity item was administered, leave blank 
-        or enter “NA.” See “Method Explanations” tab for examples of a validity item."),
-      p("Input the correct answer to the validity item."),
-      p("Indicate the alpha that will be used to detect outlying responses in the 
-        person-fit method. With a higher alpha value, more respondents will be marked 
+      p("If the data includes one or more validity items, input the number of the column 
+        corresponding to the item(s). For more than one validity item, indicate 
+        the column numbers for all validity items, separated only by a comma. 
+        These items are not included in the statistical analysis. If no validity 
+        item was administered, leave blank or enter “NA.” See “Method Explanations” 
+        tab for examples of a validity item."),
+      p("Input the correct answer to the validity item(s). For more than one validity item, 
+        indicate the correct answer for each validity item, separated only by a comma."),
+      p("Indicate the alpha to obtain the threshold for detecting outlying responses with 
+        lz, between 0.0 and 1.0. Given a higher alpha value, more respondents will be marked 
         as potentially careless. By decreasing the alpha value, this method will flag 
-        only the most aberrant responses. See “Method Explanations” tab for more 
-        information on person-fit statistics."),
-      p("Indicate the alpha that will be used to detect outlying responses in the 
-        Mahalanobis distance method. With a higher alpha value, more respondents will 
+        the fewest, most aberrant responses. See “Method Explanations” tab for more 
+        information on lz."),
+      p("Indicate the alpha to obtain the threshold for detecting outlying responses with 
+        Mahalanobis distance. With a higher alpha value, more respondents will 
         be marked as potentially careless. By decreasing the alpha value, this method 
-        will flag only the most aberrant responses.  See “Method Explanations” tab for 
+        will flag the fewest, most aberrant responses.  See “Method Explanations” tab for 
         more information on Mahalanobis distance."),
+      h2("INDIVIDUAL STATISTICS & FLAGS:"),
+      p("Please note that the output may take a few minutes to load, especially for large datasets."),
+      p("Under “Choose a table to download,” users have the option to download 
+        three different tables."),
+      p("The “Raw Careless Statistics” table displays the raw statistics resulting 
+        from each function for each person (ex. the chi-squared value for Mahalanobis
+        distance or the length of the longest longstring). This file is helpful if the
+        user prefers to make decisions about which respondents should be “flagged.”"),
+      p("The “Binary Flagged Table” replaces the raw careless statistics with a binary
+        code - “1” if the respondent is flaged (i.e., potentially careless) or “0” if the
+        respondent is not flagged under that method. This table is 
+        useful if the user prefers to rely on the standards used in the application
+         to determine which responders are deemed careless."),
+      p("The “Item-Level Descriptive Statistics” offers the mean and standard deviation of the response
+        for each item (Note: This table can only be downloaded if “Item-Level Descriptive
+        Statistics” is selected in the “Uploading Data” tab).  "),
+      p("Under “Flagged Respondents are highlighted in red,” an interactive table will 
+        display the raw statistics from each method for each respondent, highlighting 
+        cells in red when the respondent is found to be careless under that method."),
       h2("GROUP-LEVEL VISUALS:"),
       p("Please note that the output may take a few minutes to load, especially for large datasets."),
       p("The pie chart displays the relative number of responses flagged by each 
         method. Note: respondents flagged by more than one method are grouped 
         into one category, and each of the other categories (i.e. “IRV” and 
-        “Longstring”) represent response vectors flagged by only that method."),
+        “Longstring”) represent response vectors flagged by only that method.
+        When more than one validity item is present, the validity item slice 
+        represents the proportion of people flaggled by at least one item."),
       p("'Rates at which each method flags respondents' displays the aggregate 
         number of respondents flagged by each method. Note: This chart does not 
         take into account respondents that may be flagged by two or more methods. 
@@ -297,8 +324,6 @@ tabItem(
         displays the number of respondents who were flagged. For example, if 45 
         participants were deemed careless by two methods, the bar for “2” will 
         have a length of 45."),
-      h2("EXPLANATIONS OF METHODS:"),
-      p("This tab explains the methods used to detect potential careless respondents."),
       h2("DESCRIPTIVE STATISTICS:"),
       p("Please note that the output may take a few minutes to load, especially for large datasets."),
       p("If “Item-Level Descriptive Statistics” is selected in the “Uploading Data” 
@@ -319,27 +344,7 @@ tabItem(
         flagging participants who demonstrate the type of carelessness in the 
         column name. "),
       p("To add this table to a preregistration plan, the user can follow the 
-        link to a Google Document to copy the table. "),
-      h2("INDIVIDUAL STATISTICS & FLAGS:"),
-      p("Please note that the output may take a few minutes to load, especially for large datasets."),
-      p("Under “Choose a table to download,” users have the option to download 
-        three different tables."),
-      p("The “Raw Careless Statistics” table displays the raw statistics resulting 
-        from each function for each person (ex. the chi-squared value for Mahalanobis
-        distance or the length of the longest longstring). This file is helpful if the
-        user would prefer to make decisions about which respondents should be “flagged,”
-        instead of relying on the application."),
-      p("The “Binary Flagged Table” replaces the raw careless statistics with a binary
-        code - “1” if the value indicates the respondent may be careless or “0” if the
-        value does not indicate careless responding under that method. This table is 
-        useful if the user would like to rely on the standards used in the application
-        in order to determine which responders are deemed careless."),
-      p("The “Item-Level Descriptive Statistics” offers the mean and standard deviation
-        for each item (Note: This table can only be downloaded if “Item-Level Descriptive
-        Statistics” is selected in the “Uploading Data” tab).  "),
-      p("Under “Flagged Respondents are highlighted in red,” an interactive table will 
-        display the raw statistics from each method for each respondent, highlighting 
-        cells in red when the respondent is found to be careless under that method.")
+        link to a Google Document to copy the table. ")
       
     )
 )
@@ -458,7 +463,7 @@ server <- function(input, output){
         out3 <- cbind( dat2.irv, as.integer(dat2.longstring$longstr), dat2.longstring$avgstr, m, pf$PFscores)
         colnames(out3) <- cbind( "IRV", "Longest String", "Average Longstring", "Mahalanobis D", "lz")
         }else{
-          out3 <- cbind(as.integer(val_matrix), dat2.irv, as.integer(dat2.longstring$longstr), dat2.longstring$avgstr, m, pf$PFscores)
+          out3 <- cbind(val_matrix, dat2.irv, as.integer(dat2.longstring$longstr), dat2.longstring$avgstr, m, pf$PFscores)
           colnames(out3) <- c(vi_names, "IRV", "Longest String", "Average Longstring", "Mahalanobis D", "lz")
         }
        
@@ -514,13 +519,19 @@ server <- function(input, output){
    #CREATE PIE CHART
    respondenttable <- t(table(respondentflagrate))
    
-   pie <- matrix(data = 0, nrow = 1, ncol = ncol(bflagged)+1, 
-                 dimnames = list(c("Number"), 
-                                 c("Not Flagged", if(!is.null(validityitem)){"Validity Item"}, "IRV",
-                                   "Longstring", "Mahalanobis D","lz",  "More than 1 method")))
+   pie_names <- c("Not Flagged", 
+                  if(!is.null(validityitem)) "Validity Item",
+                  "IRV", "Longstring", "Mahalanobis D", "lz", 
+                  "More than 1 method")
+   
+   pie <- matrix(data = 0, nrow = 1, ncol = length(pie_names),
+                 dimnames = list(c("Number"), pie_names))
+   
    for (i in 1:nrow(respondentflagrate)){
-     any_na <- is.na(respondentflagrate[i,1]) | is.na(val[i]) | 
-       is.na(bflagged[i,"IRV"]) | is.na(bflagged[i,"Mahalanobis D"]) | 
+     any_na <- is.na(respondentflagrate[i,1]) |
+       (!is.null(vi_names) && is.na(val[i])) |
+       is.na(bflagged[i,"IRV"]) | 
+       is.na(bflagged[i,"Mahalanobis D"]) | 
        is.na(bflagged[i,"lz"])
      if (any_na) next
      
@@ -556,7 +567,7 @@ server <- function(input, output){
      mutate(ypos = cumsum(prop)- 0.5*prop )%>%
     mutate(labels = paste0(name, " ", round(prop, 1), "%"))
    
-   lbl = c("Not Flagged", if(!is.null(validityitem)){"Validity Item"}, "IRV", "Longstring", "Mahalanobis D", "lz", "More than 1 method")
+   lbl<-c("Not Flagged", if(!is.null(validityitem)){"Validity Item"}, "IRV", "Longstring", "Mahalanobis D", "lz", "More than 1 method")
    
    # Basic piechart
   piechart <-  ggplot(piedata, aes(x="", y=prop, fill=labels)) +
@@ -590,7 +601,7 @@ server <- function(input, output){
                    background = styleInterval(
                      quantile(dat.table[, "Mahalanobis D"], probs = 1 - alpha, na.rm = TRUE),
                      c("white", "red") )) %>%
-       formatStyle("Person Fit",
+       formatStyle("lz",
                    background = styleInterval(c(qnorm(alpha/2), qnorm(1-(alpha/2))), c("red","white","red")))
      
      return(dt)
@@ -605,6 +616,7 @@ server <- function(input, output){
      colnames(respondentflagrate) <- c("User ID", "Flag Rate")
     }
     rflagged <- redflag.table(int, vi_names, input$alpha)
+    
     
      return(list("int" = int, 
                 "bflagged" = bflagged, 
@@ -729,3 +741,4 @@ server <- function(input, output){
 
 #run app ----
 shinyApp(ui, server)
+
